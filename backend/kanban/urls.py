@@ -20,8 +20,8 @@ from todos.views import LoginView, TodoItemView, JoinUserView, RegisterUserView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('login/', LoginView.as_view()), #index.html
+    path('login/', LoginView.as_view(), name='login'), #index.html
     path('todos/', TodoItemView.as_view()),
-    path('register/', RegisterUserView.as_view()),
+    path('register/', RegisterUserView.as_view(), name='register'),
     path('users/', JoinUserView.as_view()),
 ]
