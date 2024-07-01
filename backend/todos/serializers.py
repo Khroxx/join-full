@@ -13,7 +13,7 @@ class TodoItemSerializer(serializers.ModelSerializer):
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     class Meta:
-        model = User
+        model = JoinUser
         fields = ('email', 'first_name', 'last_name', 'phone', 'password')
         
     def create(self, validated_data):
