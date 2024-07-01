@@ -5,8 +5,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .models import TodoItem, JoinUser
-from .serializers import RegisterSerializer, TodoItemSerializer, JoinUserSerializer
+from .models import TodoItem, JoinUser, TodoSubtask
+from .serializers import RegisterSerializer, TodoItemSerializer, JoinUserSerializer, SubtaskSerializer
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from rest_framework import viewsets, status
@@ -28,6 +28,14 @@ class TodoItemView(APIView):
     def get(self, request, format=None):
         todos = TodoItem.objects.all()
         serializer = TodoItemSerializer(todos, many=True)
+        return Response(serializer.data)
+    
+class SubtaskView(APIView):
+    permission_classes = [AllowAny]
+    
+    def get(self, request, format=None):
+        subtasks = TodoSubtask.objects.all()
+        serializer = SubtaskSerializer(subtasks, many=True)
         return Response(serializer.data)
     
 

@@ -16,12 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from todos.views import LoginView, TodoItemView, JoinUserView, RegisterUserView
+from todos.views import LoginView, TodoItemView, JoinUserView, RegisterUserView, SubtaskView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', LoginView.as_view(), name='login'), #index.html
     path('todos/', TodoItemView.as_view()),
+    path('subtasks/', SubtaskView.as_view()),
     path('register/', RegisterUserView.as_view(), name='register'),
     path('users/', JoinUserView.as_view()),
 ]

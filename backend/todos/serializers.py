@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import TodoItem, JoinUser
+from .models import TodoItem, JoinUser, TodoSubtask
 
 
 class TodoItemSerializer(serializers.ModelSerializer):
@@ -9,6 +9,11 @@ class TodoItemSerializer(serializers.ModelSerializer):
         fields = '__all__'
         #fields= ('title', 'created_at', 'description', 'priority', 'user', 'category', 'subtask', 'status')
         read_only_fields = ['username']
+    
+class SubtaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TodoSubtask
+        fields = '__all__'
     
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
