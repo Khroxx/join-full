@@ -40,10 +40,13 @@ class TodoItem(models.Model):
     priority = models.CharField(max_length=50, choices=priority_choices, default='low')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
     category = models.CharField(max_length=20, choices=category_choices, default='userstory')
-    subtask = models.CharField(max_length=50, blank=True, null=True)
+    #subtask = models.ForeignKey()
     #subtask_text = models.CharField(max_length=100, blank=True, null=True)
     #subtask_check = models.BooleanField(default=False, blank=True, null=True)
     status = models.CharField(max_length=20, choices=status_choices, default='todo')
+
+    def get_subtasks(self):
+        return self.subtasks.all()
     
     def __str__(self):
         return f'({self.id}, {self.status}) {self.title}'
