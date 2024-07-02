@@ -38,7 +38,8 @@ class TodoItem(models.Model):
     description = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateField(default=datetime.date.today)
     priority = models.CharField(max_length=50, choices=priority_choices, default='low')
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
+    users = models.ManyToManyField(JoinUser, related_name='todo_users')
+    #user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
     category = models.CharField(max_length=20, choices=category_choices, default='userstory')
     status = models.CharField(max_length=20, choices=status_choices, default='todo')
 
