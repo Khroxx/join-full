@@ -1,18 +1,19 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
 import datetime
 
 # Create your models here.
 
 class JoinUser(models.Model):
     email = models.EmailField(blank=True, null=True)
-    first_name = models.CharField(max_length=100, blank=True, null=True)
-    last_name = models.CharField(max_length=100, blank=True, null=True)
     username = models.CharField(max_length=200, blank=True, null=True)
     phone = models.CharField(max_length=15, blank=True, null=True)
-    
+    password = models.CharField(max_length=128, default="")
     def save(self, *args, **kwargs):
-        self.username = f"{self.first_name} {self.last_name}".strip()
+        if self.password: 
+            self.password = make_password(self.password)
         super(JoinUser, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -38,8 +39,7 @@ class TodoItem(models.Model):
     description = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateField(default=datetime.date.today)
     priority = models.CharField(max_length=50, choices=priority_choices, default='low')
-    users = models.ManyToManyField(JoinUser, related_name='todo_users')
-    #user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
+    users = models.ManyToManyField(User, related_name='todo_users', blank=True)
     category = models.CharField(max_length=20, choices=category_choices, default='userstory')
     status = models.CharField(max_length=20, choices=status_choices, default='todo')
 

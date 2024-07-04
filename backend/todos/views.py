@@ -17,7 +17,7 @@ from rest_framework import viewsets, status
 class JoinUserView(APIView):
     permission_classes = [AllowAny] # Keine Authentifizierung erforderlich
     def get(self, request, format=None):
-        users = JoinUser.objects.all()
+        users = User.objects.all()
         serializer = JoinUserSerializer(users, many=True)
         return Response(serializer.data)
 
@@ -30,6 +30,13 @@ class TodoItemView(APIView):
         serializer = TodoItemSerializer(todos, many=True)
         return Response(serializer.data)
     
+    def post(self, request, format=None):
+        serializer = TodoItemSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Todo erfolgreich registriert"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 class SubtaskView(APIView):
     permission_classes = [AllowAny]
     
@@ -41,15 +48,22 @@ class SubtaskView(APIView):
 
 class LoginView(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data,
-                                       context={'request': request})
+        # serializer = self.serializer_class(data=request.data,
+        #                                context={'request': request})
+        serializer = JoinUserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
+        username = serializer.validated_data['username']
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return Response({"error": "Benutzer existiert nicht"}, status=404)
+        
         token, created = Token.objects.get_or_create(user=user)
         return Response({
             'token': token.key,
             'user_id': user.pk,
-            'email': user.email
+            'email': user.email,
+            'username': user.username
         })
 
 class RegisterUserView(APIView):

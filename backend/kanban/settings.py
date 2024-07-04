@@ -29,7 +29,8 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1'
 ]
-CORS_ALLOW_ALL_ORIGINS =  ['http://localhost:4200',]
+CORS_ALLOW_ALL_ORIGINS =  ['http://localhost:4200',
+                           '127.0.0.1']
 
 # Application definition
 
@@ -135,3 +136,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ]
 }
+
+
+# AUTH_USER_MODEL = 'todos.JoinUser'
