@@ -1,6 +1,5 @@
 from django.contrib import admin
-from .models import TodoItem, JoinUser, TodoSubtask
-from django.contrib.auth.models import User
+from .models import TodoItem, TodoSubtask, CustomUser
 
 # Register your models here.
 
@@ -9,5 +8,5 @@ class TodoItemAdmin(admin.ModelAdmin):
     
 
 admin.site.register(TodoItem, TodoItemAdmin)
-admin.site.register(JoinUser)
 admin.site.register(TodoSubtask)
+admin.site.register(CustomUser)

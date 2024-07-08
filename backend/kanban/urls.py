@@ -15,16 +15,22 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
-from django.contrib.auth.models import User
-from todos.views import LoginView, TodoItemView, JoinUserView, RegisterUserView, SubtaskView
+from django.urls import path
+from todos.views import LoginView, TodoItemView, RegisterUserView, SubtaskView, LogoutView, CustomUserView, GuestLoginView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('login/', LoginView.as_view(), name='login'), #index.html
+    path('login/', LoginView.as_view(), name='login'),
+    path('logout/', LogoutView.as_view(), name='logout'),
     path('todos/', TodoItemView.as_view()),
+    path('todos/<int:pk>/', TodoItemView.as_view()),
+    path('todos/<int:pk>/delete/', TodoItemView.as_view()),
     path('subtasks/', SubtaskView.as_view()),
+    path('subtasks/<int:pk>/', SubtaskView.as_view()),
+    path('subtasks/<int:pk>/delete/', SubtaskView.as_view()),
     path('register/', RegisterUserView.as_view(), name='register'),
-    path('users/', JoinUserView.as_view()),
-    # path('users/', User)
+    path('users/', CustomUserView.as_view()),
+    path('users/<int:pk>/', CustomUserView.as_view(), name='user-update'),
+    path('users/<int:pk>/delete/', CustomUserView.as_view(), name='delete_user'),
+    path('guest/', GuestLoginView.as_view())
 ]

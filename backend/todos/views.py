@@ -1,25 +1,38 @@
-from django.shortcuts import render
-from django.views import generic
+from django.shortcuts import get_object_or_404
 from rest_framework.authtoken.views import ObtainAuthToken, APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from .models import TodoItem, JoinUser, TodoSubtask
-from .serializers import RegisterSerializer, TodoItemSerializer, JoinUserSerializer, SubtaskSerializer
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.models import User
-from rest_framework import viewsets, status
+from rest_framework.permissions import  AllowAny
+from .models import TodoItem, TodoSubtask, CustomUser
+from .serializers import RegisterSerializer, TodoItemSerializer, SubtaskSerializer, CustomUserSerializer
+from rest_framework import status
+from django.contrib.auth import login, logout
+from guest_user.decorators import allow_guest_user
+
 
 # Create your views here.
-
-
-class JoinUserView(APIView):
+class CustomUserView(APIView):
     permission_classes = [AllowAny] # Keine Authentifizierung erforderlich
+    
     def get(self, request, format=None):
-        users = User.objects.all()
-        serializer = JoinUserSerializer(users, many=True)
+        users = CustomUser.objects.all()
+        serializer = CustomUserSerializer(users, many=True)
         return Response(serializer.data)
+    
+    def put(self, request, pk, format=None):
+        user = get_object_or_404(CustomUser, pk=pk)
+        serializer = CustomUserSerializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, pk, format=None):
+        user = get_object_or_404(CustomUser, pk=pk)
+        user.delete()
+        return Response({"message": "erfolgreich gelöscht"})
+
+
 
 class TodoItemView(APIView):
     #authentication_classes = [TokenAuthentication]
@@ -33,9 +46,22 @@ class TodoItemView(APIView):
     def post(self, request, format=None):
         serializer = TodoItemSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response({"message": "Todo erfolgreich registriert"}, status=status.HTTP_201_CREATED)
+            saved_todo = serializer.save()
+            return Response({"id": saved_todo.id }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def put(self, request, pk, format=None):
+        todo = get_object_or_404(TodoItem, pk=pk)
+        serializer = TodoItemSerializer(todo, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, pk, format=None):
+        todo = get_object_or_404(TodoItem, pk=pk)
+        todo.delete()
+        return Response({"message": "erfolgreich gelöscht"})
     
 class SubtaskView(APIView):
     permission_classes = [AllowAny]
@@ -45,31 +71,62 @@ class SubtaskView(APIView):
         serializer = SubtaskSerializer(subtasks, many=True)
         return Response(serializer.data)
     
+    def post(self, request, format=None):
+        serializer = SubtaskSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def put(self, request, pk, format=None):
+        subtask = get_object_or_404(TodoSubtask, pk=pk)
+        serializer = SubtaskSerializer(subtask, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, pk, format=None):
+        subtask = get_object_or_404(TodoSubtask, pk=pk)
+        subtask.delete()
+        return Response({"message": "erfolgreich gelöscht"})
+
 
 class LoginView(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
-        # serializer = self.serializer_class(data=request.data,
-        #                                context={'request': request})
-        serializer = JoinUserSerializer(data=request.data)
+        serializer = CustomUserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         username = serializer.validated_data['username']
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            return Response({"error": "Benutzer existiert nicht"}, status=404)
         
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({
-            'token': token.key,
-            'user_id': user.pk,
-            'email': user.email,
-            'username': user.username
-        })
+        user = CustomUser.objects.get(username=username)
+        if user is not None:
+            login(request, user)
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({
+                'token': token.key,
+                'user_id': user.pk,
+                'email': user.email,
+                'username': user.username
+            })
+        else:
+            return Response({"error": "Falsche Anmeldedaten"}, status=400)
+        
+class GuestLoginView(APIView):
+    @allow_guest_user
+    def guest_view(self, request, *args, **kwargs):
+        assert request.user.is_authenticated
+        
+    
+
+class LogoutView(APIView):
+    def post(self, request, *args, **kwargs):
+        logout(request)
+        return Response(status=204) 
 
 class RegisterUserView(APIView):
     def post(self, request, format=None):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "Benutzer erfolgreich registriert"}, status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

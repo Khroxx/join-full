@@ -29,12 +29,11 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1'
 ]
-CORS_ALLOW_ALL_ORIGINS =  ['http://localhost:4200',
-                           '127.0.0.1']
 
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,7 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'todos',
-    'rest_framework.authtoken'
+    'rest_framework.authtoken',
+    
+    # 'guest_user',
 ]
 
 MIDDLEWARE = [
@@ -58,6 +59,10 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'kanban.urls'
+
+AUTH_USER_MODEL = 'todos.CustomUser'
+
+CORS_ALLOW_ALL_ORIGINS =  True
 
 TEMPLATES = [
     {
@@ -91,6 +96,8 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
+
+# AUTHENTICATION_BACKENDS = ['guest_user.backends.GuestBackend']
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -138,4 +145,3 @@ REST_FRAMEWORK = {
 }
 
 
-# AUTH_USER_MODEL = 'todos.JoinUser'
